@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'home_screen.dart';
-// import 'signup_screen.dart'; // 이 라인을 제거하거나 실제 회원가입 화면이 있다면 주석을 해제하십시오.
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -32,6 +33,45 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  void _login() async {
+    final url = Uri.http('3.35.70.96', '/login');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'ID': _emailController.text,
+        'PW': _passwordController.text,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> responseData = jsonDecode(response.body);
+      String sessionID = responseData['session_id'];
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen(sessionID: sessionID)),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('로그인 실패'),
+          content: Text('아이디와 비밀번호를 확인해주세요.'),
+          actions: [
+            TextButton(
+              child: Text('확인'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,26 +95,15 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _isButtonEnabled
-                  ? () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => HomeScreen()),
-                      );
-                    }
-                  : null,
+              onPressed: _isButtonEnabled ? _login : null,
               style: ElevatedButton.styleFrom(
-                primary: _isButtonEnabled ? Colors.purple : Colors.grey,
+                backgroundColor: _isButtonEnabled ? Colors.purple : Colors.grey,
               ),
               child: Text('로그인'),
             ),
             TextButton(
               onPressed: () {
-                // 실제 회원가입 화면이 있는 경우 주석을 해제하고 사용하십시오.
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => SignupScreen()),
-                // );
+                Navigator.pushNamed(context, '/signup');
               },
               child: Text('회원가입'),
             ),
@@ -83,10 +112,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: LoginScreen(),
-  ));
 }

@@ -17,11 +17,11 @@ class PostScreen extends StatelessWidget {
               '[자유] 이게 최종본으로 할게요',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 10), // 공간 추가
+            SizedBox(height: 10),
             Row(
               children: [
                 CircleAvatar(
-                  backgroundImage: AssetImage('assets/profile_image.png'), // 프로필 이미지가 있다면 추가
+                  backgroundImage: AssetImage('assets/profile_image.png'),
                 ),
                 SizedBox(width: 10),
                 Column(
@@ -33,8 +33,8 @@ class PostScreen extends StatelessWidget {
                 ),
               ],
             ),
-            Divider(height: 20, thickness: 1), // 높이와 두께 설정
-            SizedBox(height: 10), // 공간 추가
+            Divider(height: 20, thickness: 1),
+            SizedBox(height: 10),
             Text(
               '네',
               style: TextStyle(fontSize: 16),
@@ -55,4 +55,3 @@ class PostScreen extends StatelessWidget {
     );
   }
 }
-

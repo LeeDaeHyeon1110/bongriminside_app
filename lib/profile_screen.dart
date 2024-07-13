@@ -14,7 +14,7 @@ class ProfileScreen extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 50,
-              backgroundImage: AssetImage('assets/profile_image.png'), // 프로필 이미지 추가
+              backgroundImage: AssetImage('assets/profile_image.png'),
             ),
             SizedBox(height: 10),
             Text(
@@ -29,7 +29,7 @@ class ProfileScreen extends StatelessWidget {
               '선택과목: ~',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey, // 텍스트 색상 추가
+                color: Colors.grey,
               ),
             ),
           ],
@@ -38,15 +38,3 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 }
-
-void main() {
-  runApp(MaterialApp(
-    home: ProfileScreen(),
-    debugShowCheckedModeBanner: false, // 디버그 배너 제거
-    theme: ThemeData(
-      primarySwatch: Colors.purple,
-    ),
-  ));
-}
-
-
