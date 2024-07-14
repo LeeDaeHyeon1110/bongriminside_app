@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'post_screen.dart';
 import 'subject_room.dart';
 import 'profile_screen.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class HomeScreen extends StatefulWidget {
   final String sessionID;
@@ -15,22 +15,18 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
+  final storage = FlutterSecureStorage();
+  String _userID = '';
 
-  static final List<Widget> _widgetOptions = <Widget>[
-    SubjectRoom(),
-    ProfileScreen(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _getUserInfo();
   }
 
-  void _logout() async {
-    final url = Uri.http('3.35.70.96', '/logout');
-    final response = await http.delete(
+  Future<void> _getUserInfo() async {
+    final url = Uri.http('3.35.70.96', '/profile');
+    final response = await http.get(
       url,
       headers: {
         'Cookie': 'session_id=${widget.sessionID}',
@@ -38,24 +34,27 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (response.statusCode == 200) {
-      Navigator.pop(context); // 로그인 화면으로 이동
+      Map<String, dynamic> responseData = jsonDecode(response.body);
+      setState(() {
+        _userID = responseData['user']['name'];
+      });
     } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('로그아웃 실패'),
-          content: Text('다시 시도해주세요.'),
-          actions: [
-            TextButton(
-              child: Text('확인'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        ),
-      );
+      // Error handling, e.g., session expired
+      // Redirect to login screen or show error message
+      print('Failed to load user information');
     }
+  }
+
+  Future<void> _logout() async {
+    final url = Uri.http('3.35.70.96', '/logout');
+    await http.delete(
+      url,
+      headers: {
+        'Cookie': 'session_id=${widget.sessionID}',
+      },
+    );
+    await storage.delete(key: 'sessionID');
+    Navigator.pop(context);
   }
 
   @override
@@ -65,28 +64,37 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text('홈'),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: Icon(Icons.person),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProfileScreen()),
+              );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.exit_to_app),
             onPressed: _logout,
           ),
         ],
       ),
       body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '과목',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: '프로필',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.purple,
-        onTap: _onItemTapped,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('환영합니다, $_userID 님', style: TextStyle(fontSize: 24)),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SubjectRoom()),
+                );
+              },
+              child: Text('과목 선택하기'),
+            ),
+          ],
+        ),
       ),
     );
   }

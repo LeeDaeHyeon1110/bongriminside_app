@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'home_screen.dart';
@@ -16,87 +17,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _securityAnswerController = TextEditingController();
   final TextEditingController _selectedSubjectController = TextEditingController();
   final TextEditingController _teacherController = TextEditingController();
-  bool _isButtonEnabled = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _idController.addListener(_updateButtonState);
-    _nameController.addListener(_updateButtonState);
-    _passwordController.addListener(_updateButtonState);
-    _securityQuestionController.addListener(_updateButtonState);
-    _securityAnswerController.addListener(_updateButtonState);
-    _selectedSubjectController.addListener(_updateButtonState);
-    _teacherController.addListener(_updateButtonState);
-  }
-
-  void _updateButtonState() {
-    setState(() {
-      _isButtonEnabled = _idController.text.isNotEmpty &&
-          _nameController.text.isNotEmpty &&
-          _passwordController.text.isNotEmpty &&
-          _securityQuestionController.text.isNotEmpty &&
-          _securityAnswerController.text.isNotEmpty &&
-          _selectedSubjectController.text.isNotEmpty &&
-          _teacherController.text.isNotEmpty;
-    });
-  }
-
-  @override
-  void dispose() {
-    _idController.dispose();
-    _nameController.dispose();
-    _passwordController.dispose();
-    _securityQuestionController.dispose();
-    _securityAnswerController.dispose();
-    _selectedSubjectController.dispose();
-    _teacherController.dispose();
-    super.dispose();
-  }
-
-  void _register() async {
-    final url = Uri.http('3.35.70.96', '/register');
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'ID': _idController.text,
-        '이름': _nameController.text,
-        'PW': _passwordController.text,
-        'security_question': _securityQuestionController.text,
-        'security_answer': _securityAnswerController.text,
-        '선택한 과목': _selectedSubjectController.text,
-        '선생님': _teacherController.text,
-      }),
-    );
-
-    if (response.statusCode == 201) {
-      Map<String, dynamic> responseData = jsonDecode(response.body);
-      String sessionID = responseData['session_id'];
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen(sessionID: sessionID)),
-      );
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('회원가입 실패'),
-          content: Text('입력 정보를 다시 확인해주세요.'),
-          actions: [
-            TextButton(
-              child: Text('확인'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        ),
-      );
-    }
-  }
+  final storage = FlutterSecureStorage();
 
   @override
   Widget build(BuildContext context) {
@@ -140,15 +61,60 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _isButtonEnabled ? _register : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _isButtonEnabled ? Colors.purple : Colors.grey,
-              ),
+              onPressed: () {
+                _register();
+              },
               child: Text('회원가입'),
             ),
           ],
         ),
       ),
     );
+  }
+
+  void _register() async {
+    final url = Uri.http('3.35.70.96', '/register');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'ID': _idController.text,
+        '이름': _nameController.text,
+        'PW': _passwordController.text,
+        'security_question': _securityQuestionController.text,
+        'security_answer': _securityAnswerController.text,
+        '선택한 과목': _selectedSubjectController.text,
+        '선생님': _teacherController.text,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      // 회원가입 성공 시 세션 ID 저장
+      final sessionID = response.headers['set-cookie'];
+      await storage.write(key: 'sessionID', value: sessionID!);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen(sessionID: '',)),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('회원가입 실패'),
+          content: Text('입력 정보를 다시 확인해주세요.'),
+          actions: [
+            TextButton(
+              child: Text('확인'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      );
+    }
   }
 }

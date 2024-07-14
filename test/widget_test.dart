@@ -84,7 +84,7 @@ void main() {
 
   testWidgets('CommentScreen contains a text field and list of comments', (WidgetTester tester) async {
     // Build the CommentScreen widget.
-    await tester.pumpWidget(MaterialApp(home: CommentScreen()));
+    await tester.pumpWidget(MaterialApp(home: CommentScreen(postId: '',)));
 
     // Verify that the CommentScreen has a text field and a list of comments.
     expect(find.byType(TextField), findsOneWidget);

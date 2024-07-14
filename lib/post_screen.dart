@@ -20,9 +20,9 @@ class PostScreen extends StatelessWidget {
             SizedBox(height: 10),
             Row(
               children: [
-                CircleAvatar(
-                  backgroundImage: AssetImage('assets/profile_image.png'),
-                ),
+                // CircleAvatar(
+                //   backgroundImage: AssetImage('assets/profile_image.png'),
+                // ),
                 SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,7 +46,7 @@ class PostScreen extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => CommentScreen()),
+            MaterialPageRoute(builder: (context) => CommentScreen(postId: '',)),
           );
         },
         child: Icon(Icons.comment),

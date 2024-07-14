@@ -12,10 +12,10 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage('assets/profile_image.png'),
-            ),
+            // CircleAvatar(
+            //   radius: 50,
+            //   backgroundImage: AssetImage('assets/profile_image.png'),
+            // ),
             SizedBox(height: 10),
             Text(
               '3719 표강준',
